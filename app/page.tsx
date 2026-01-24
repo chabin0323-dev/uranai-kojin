@@ -1,4 +1,7 @@
+"use client";
 
+import React, { useState, useEffect, useCallback } from 'react';
+// ...以下、今のコードが続く
 import React, { useState, useEffect, useCallback } from 'react';
 import { Fortune, UserInfo } from './types';
 import { BLOOD_TYPES, ZODIAC_SIGNS, ETO } from './constants';
