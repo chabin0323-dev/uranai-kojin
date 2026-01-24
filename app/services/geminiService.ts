@@ -1,7 +1,6 @@
 import { GoogleGenAI, SchemaType } from "@google/generative-ai";
 import { Fortune, UserInfo } from '../types';
 
-// APIキーの設定（Vercelの環境変数 API_KEY を読み込みます）
 const genAI = new GoogleGenAI(process.env.API_KEY || "");
 const model = genAI.getGenerativeModel({
   model: "gemini-1.5-flash",
@@ -10,7 +9,7 @@ const model = genAI.getGenerativeModel({
 export const getFortune = async (userInfo: UserInfo, targetDate: string): Promise<Fortune> => {
   const prompt = `${targetDate}の運勢を占ってください。
 入力情報：${JSON.stringify(userInfo)}
-【重要】評価(luck)は1〜5の数値で、解説(text)は40文字以内で出力してください。`;
+【重要】評価(luck)は1〜5の数値、解説(text)は40文字以内で簡潔に出力してください。`;
 
   const result = await model.generateContent({
     contents: [{ role: "user", parts: [{ text: prompt }] }],
@@ -32,6 +31,5 @@ export const getFortune = async (userInfo: UserInfo, targetDate: string): Promis
     }
   });
 
-  // AIからの回答をJSONとして解析して返します
   return JSON.parse(result.response.text()) as Fortune;
 };
