@@ -1,61 +1,91 @@
 "use client";
 import React, { useState } from 'react';
 
-export default function Home() {
+export default function FortuneApp() {
   const [name, setName] = useState('');
-  const [result, setResult] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState("");
 
-  const fortuneList = [
-    "今日は最高の一日！新しいことに挑戦してみて。",
-    "ラッキーアイテムは『青いペン』。集中力がアップします。",
-    "一息つくのが吉。温かい飲み物を飲んでリラックス。",
-    "思わぬところから幸運が舞い込む予感！",
-    "今日は聞き手に回ると、良い人間関係が築けそう。"
+  // Historyで見つけた、あなたが考えた占いメッセージ
+  const fortunes = [
+    "超ラッキー！最高の一日になります✨",
+    "いい感じ！自分を信じて進もう🔥",
+    "今日はのんびり過ごすと運気が上がります☕",
+    "新しいことに挑戦するチャンス！🔥"
   ];
 
-  const handleFortune = () => {
-    if (!name) return alert("名前を入力してね！");
-    setLoading(true);
-    // AI風の演出（1秒待つ）
-    setTimeout(() => {
-      const randomResult = fortuneList[Math.floor(Math.random() * fortuneList.length)];
-      setResult(`${name}さんの今日の運勢： ${randomResult}`);
-      setLoading(false);
-    }, 1000);
+  const drawFortune = () => {
+    if (!name) return alert("名前を入れてね！");
+    const random = fortunes[Math.floor(Math.random() * fortunes.length)];
+    setResult(random);
   };
 
   return (
-    <div style={{ padding: '40px', textAlign: 'center', fontFamily: 'sans-serif', backgroundColor: '#f9f5ff', minHeight: '100vh' }}>
-      <h1 style={{ color: '#7c3aed', marginBottom: '30px' }}>🌟 AI占いアプリ 🌟</h1>
+    <div style={{ 
+      padding: '40px', 
+      textAlign: 'center', 
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', // 豪華な背景
+      color: 'white',
+      fontFamily: 'sans-serif'
+    }}>
+      <h1 style={{ fontSize: '3rem', marginBottom: '20px', textShadow: '2px 2px 4px rgba(0,0,0,0.3)' }}>
+        🌟 私の占いアプリ 🌟
+      </h1>
       
-      <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: '20px', boxShadow: '0 4px 6px rgba(0,0,0,0.1)', maxWidth: '400px', margin: '0 auto' }}>
+      <div style={{ 
+        backgroundColor: 'rgba(255, 255, 255, 0.2)', 
+        padding: '30px', 
+        borderRadius: '20px', 
+        backdropFilter: 'blur(10px)',
+        maxWidth: '500px',
+        margin: '0 auto'
+      }}>
         <input
           type="text"
           placeholder="あなたの名前を入れてね"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          style={{ width: '100%', padding: '12px', marginBottom: '20px', borderRadius: '8px', border: '1px solid #ddd', boxSizing: 'border-box' }}
+          style={{ 
+            width: '80%', 
+            padding: '15px', 
+            borderRadius: '30px', 
+            border: 'none', 
+            fontSize: '18px',
+            marginBottom: '20px'
+          }}
         />
-        
-        <button
-          onClick={handleFortune}
-          disabled={loading}
-          style={{ width: '100%', padding: '12px', backgroundColor: '#7c3aed', color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '16px', fontWeight: 'bold' }}
+        <br />
+        <button 
+          onClick={drawFortune}
+          style={{ 
+            padding: '15px 40px', 
+            fontSize: '20px', 
+            cursor: 'pointer', 
+            borderRadius: '30px', 
+            backgroundColor: '#FFD700', 
+            border: 'none',
+            color: '#333',
+            fontWeight: 'bold',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.2)'
+          }}
         >
-          {loading ? '占い中...' : '運勢を占う！'}
+          運勢を占う！
         </button>
 
         {result && (
-          <div style={{ marginTop: '30px', padding: '15px', backgroundColor: '#f3f0ff', borderRadius: '10px', color: '#5b21b6', fontWeight: 'bold', lineHeight: '1.6' }}>
-            {result}
+          <div style={{ 
+            marginTop: '30px', 
+            padding: '20px', 
+            backgroundColor: 'rgba(255,255,255,0.9)', 
+            borderRadius: '15px', 
+            color: '#764ba2',
+            fontSize: '24px', 
+            fontWeight: 'bold' 
+          }}>
+            {name}さん：{result}
           </div>
         )}
       </div>
-      
-      <p style={{ marginTop: '40px', color: '#6b7280', fontSize: '14px' }}>
-        ※これは「Ready」を維持するための安定版コードです
-      </p>
     </div>
   );
 }
