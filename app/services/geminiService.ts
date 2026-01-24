@@ -1,32 +1,35 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, SchemaType } from "@google/generative-ai";
 import { Fortune, UserInfo } from '../types';
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+const genAI = new GoogleGenAI(process.env.API_KEY || "");
+const model = genAI.getGenerativeModel({
+  model: "gemini-1.5-flash",
+});
 
 export const getFortune = async (userInfo: UserInfo, targetDate: string): Promise<Fortune> => {
-  const response = await ai.models.generateContent({
-    // ↓ ここを最新の正しいモデル名に修正しました
-    model: "gemini-1.5-flash", 
-    contents: `${targetDate}の運勢を占ってください。
-【重要】評価(luck)は1〜5で分散させ、解説(text)は40文字以内で簡潔に出力してください。
-入力情報：${JSON.stringify(userInfo)}`,
-    config: {
+  const prompt = `${targetDate}の運勢を占ってください。
+入力情報：${JSON.stringify(userInfo)}
+【重要】評価(luck)は1〜5で分散させ、解説(text)は40文字以内で簡潔に出力してください。`;
+
+  const result = await model.generateContent({
+    contents: [{ role: "user", parts: [{ text: prompt }] }],
+    generationConfig: {
       responseMimeType: "application/json",
-      seed: 42,
       responseSchema: {
-        type: Type.OBJECT,
+        type: SchemaType.OBJECT,
         properties: {
-          overall: { type: Type.OBJECT, properties: { luck: { type: Type.INTEGER }, text: { type: Type.STRING } }, required: ["luck", "text"] },
-          money: { type: Type.OBJECT, properties: { luck: { type: Type.INTEGER }, text: { type: Type.STRING } }, required: ["luck", "text"] },
-          health: { type: Type.OBJECT, properties: { luck: { type: Type.INTEGER }, text: { type: Type.STRING } }, required: ["luck", "text"] },
-          love: { type: Type.OBJECT, properties: { luck: { type: Type.INTEGER }, text: { type: Type.STRING } }, required: ["luck", "text"] },
-          work: { type: Type.OBJECT, properties: { luck: { type: Type.INTEGER }, text: { type: Type.STRING } }, required: ["luck", "text"] },
-          luckyItem: { type: Type.STRING },
-          luckyNumber: { type: Type.STRING }
+          overall: { type: SchemaType.OBJECT, properties: { luck: { type: SchemaType.NUMBER }, text: { type: SchemaType.STRING } }, required: ["luck", "text"] },
+          money: { type: SchemaType.OBJECT, properties: { luck: { type: SchemaType.NUMBER }, text: { type: SchemaType.STRING } }, required: ["luck", "text"] },
+          health: { type: SchemaType.OBJECT, properties: { luck: { type: SchemaType.NUMBER }, text: { type: SchemaType.STRING } }, required: ["luck", "text"] },
+          love: { type: SchemaType.OBJECT, properties: { luck: { type: SchemaType.NUMBER }, text: { type: SchemaType.STRING } }, required: ["luck", "text"] },
+          work: { type: SchemaType.OBJECT, properties: { luck: { type: SchemaType.NUMBER }, text: { type: SchemaType.STRING } }, required: ["luck", "text"] },
+          luckyItem: { type: SchemaType.STRING },
+          luckyNumber: { type: SchemaType.STRING }
         },
         required: ["overall", "money", "health", "love", "work", "luckyItem", "luckyNumber"]
       }
-    },
+    }
   });
-  return JSON.parse(response.text) as Fortune;
+
+  return JSON.parse(result.response.text()) as Fortune;
 };
