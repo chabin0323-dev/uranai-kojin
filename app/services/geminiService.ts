@@ -3,15 +3,10 @@ import { Fortune, UserInfo } from '../types';
 
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
-/**
- * 鑑定実行サービス
- * 入力された個人情報はAIへの送信に使用されるのみで、
- * アプリケーションサーバー側での保存は一切行われません。
- * Google Maps API等の外部ツールも一切使用しません。
- */
 export const getFortune = async (userInfo: UserInfo, targetDate: string): Promise<Fortune> => {
   const response = await ai.models.generateContent({
-    model: "gemini-3-flash-preview",
+    // ↓ ここを最新の正しいモデル名に修正しました
+    model: "gemini-1.5-flash", 
     contents: `${targetDate}の運勢を占ってください。
 【重要】評価(luck)は1〜5で分散させ、解説(text)は40文字以内で簡潔に出力してください。
 入力情報：${JSON.stringify(userInfo)}`,
