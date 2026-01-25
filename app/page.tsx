@@ -1,99 +1,202 @@
-"use client";
-import React, { useState } from 'react';
 
-export default function FortuneApp() {
-  const [name, setName] = useState('');
-  const [result, setResult] = useState("");
+import React, { useState, useEffect, useCallback } from 'react';
+import { Fortune, UserInfo } from './types';
+import { BLOOD_TYPES, ZODIAC_SIGNS, ETO } from './constants';
+import { getFortune } from './services/geminiService';
+import { FortuneResultDisplay } from './components/FortuneResultDisplay';
+import { FortuneForm } from './components/FortuneForm';
+import { Loader } from './components/Loader';
+import { Logo } from './components/Logo';
+import { Manual } from './components/Manual';
 
-  const drawFortune = () => {
-    const fortunes = ["超ラッキー！✨", "自分を信じて！🔥", "のんびりいこう☕"];
-    setResult(fortunes[Math.floor(Math.random() * fortunes.length)]);
+const STORAGE_KEY_FORTUNE = 'persisted_fortune_result';
+
+const App: React.FC = () => {
+  const initialInfo: UserInfo = {
+    name: 'あなた', year: '1990', month: '1', day: '1',
+    bloodType: BLOOD_TYPES[0], zodiacSign: ZODIAC_SIGNS[0], eto: ETO[0]
+  };
+  const [userInfo, setUserInfo] = useState<UserInfo>(initialInfo);
+  const [savedInfo, setSavedInfo] = useState<UserInfo>(initialInfo);
+  const [targetDateType, setTargetDateType] = useState<'today' | 'tomorrow'>('today');
+  const [isLocked, setIsLocked] = useState(false);
+  const [isFortuneForOthers, setIsFortuneForOthers] = useState(false);
+  const [fortune, setFortune] = useState<Fortune | null>(null);
+  const [displayDate, setDisplayDate] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | null>(null);
+
+  // 利用回数管理 (ブラウザのlocalStorageのみを使用)
+  const [usageCount, setUsageCount] = useState(0);
+  const MAX_USAGE = 5;
+
+  // 1. 意図しない画面遷移の防止（BeforeUnload）
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (isLoading) {
+        e.preventDefault();
+        e.returnValue = '入力内容が消去されますがよろしいですか？';
+        return e.returnValue;
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [isLoading]);
+
+  // 2. データ復元と初期化
+  useEffect(() => {
+    // 固定プロフィールの復元
+    const storedProfile = localStorage.getItem('user_profile');
+    if (storedProfile) {
+      const profile = JSON.parse(storedProfile);
+      setUserInfo(profile);
+      setSavedInfo(profile);
+      setIsLocked(true);
+    }
+
+    // 前回の鑑定結果の復元（バックグラウンド維持・クラッシュ対策）
+    const storedFortune = localStorage.getItem(STORAGE_KEY_FORTUNE);
+    if (storedFortune) {
+      try {
+        const { fortune: f, date, name } = JSON.parse(storedFortune);
+        setFortune(f);
+        setDisplayDate(date);
+        setAutoSaveStatus('saved');
+      } catch (e) {
+        console.error("Failed to restore fortune", e);
+      }
+    }
+
+    // 利用回数の日付判定とリセット
+    const today = new Date().toLocaleDateString();
+    const storedUsage = localStorage.getItem('fortune_usage');
+    if (storedUsage) {
+      const { date, count } = JSON.parse(storedUsage);
+      if (date === today) {
+        setUsageCount(count);
+      } else {
+        localStorage.setItem('fortune_usage', JSON.stringify({ date: today, count: 0 }));
+        setUsageCount(0);
+      }
+    } else {
+      localStorage.setItem('fortune_usage', JSON.stringify({ date: today, count: 0 }));
+    }
+  }, []);
+
+  // 3. リアルタイム保存ロジック
+  const persistFortune = useCallback((f: Fortune, date: string, name: string) => {
+    setAutoSaveStatus('saving');
+    // Local Storageへのリアルタイム保存
+    localStorage.setItem(STORAGE_KEY_FORTUNE, JSON.stringify({ fortune: f, date, name }));
+    // ユーザーへの安心感のためのインジケーター表示制御
+    setTimeout(() => setAutoSaveStatus('saved'), 800);
+  }, []);
+
+  const handleLockToggle = (locked: boolean) => {
+    setIsLocked(locked);
+    if (locked && !isFortuneForOthers) {
+      localStorage.setItem('user_profile', JSON.stringify(userInfo));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (usageCount >= MAX_USAGE) return;
+
+    setIsLoading(true);
+    setError(null);
+    setAutoSaveStatus(null);
+    
+    try {
+      const date = new Date();
+      if (targetDateType === 'tomorrow') date.setDate(date.getDate() + 1);
+      const dateStr = date.toLocaleDateString('ja-JP');
+      const label = `${dateStr} (${targetDateType === 'today' ? '今日' : '明日'})`;
+      
+      const result = await getFortune(userInfo, dateStr);
+      setFortune(result);
+      setDisplayDate(label);
+      
+      // 生成完了直後に即座に保存
+      persistFortune(result, label, userInfo.name);
+      
+      const newCount = usageCount + 1;
+      setUsageCount(newCount);
+      localStorage.setItem('fortune_usage', JSON.stringify({ 
+        date: new Date().toLocaleDateString(), 
+        count: newCount 
+      }));
+    } catch (err) {
+      setError('占いに失敗しました。');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleStartOthers = () => {
+    setSavedInfo({ ...userInfo });
+    setIsFortuneForOthers(true);
+    setIsLocked(false);
+    setUserInfo({ ...initialInfo, name: 'あの人' });
+  };
+
+  const handleReturnMyInfo = () => {
+    setIsFortuneForOthers(false);
+    setIsLocked(true);
+    setUserInfo({ ...savedInfo });
   };
 
   return (
-    <div style={{ 
-      backgroundColor: 'black', color: 'white', minHeight: '100vh', 
-      fontFamily: 'sans-serif', padding: '20px', display: 'flex', flexDirection: 'column', alignItems: 'center' 
-    }}>
-      {/* ヘッダーエリア */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', maxWidth: '600px', marginBottom: '20px' }}>
-        <h1 style={{ color: '#4fd1c5', fontSize: '24px' }}>AI Fortune Teller</h1>
-        <button style={{ backgroundColor: '#4c51bf', color: 'white', border: 'none', padding: '5px 15px', borderRadius: '5px' }}>取扱説明書</button>
-      </div>
-
-      {/* メインカード */}
-      <div style={{ 
-        backgroundColor: '#1a202c', border: '1px solid #2d3748', borderRadius: '20px', 
-        padding: '30px', width: '100%', maxWidth: '600px' 
-      }}>
-        <h2 style={{ textAlign: 'center', color: '#d6bcfa', marginBottom: '20px' }}>占いたい方の情報を入力して下さい</h2>
-        
-        {/* 入力フォーム再現 */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '20px' }}>
-          <div><label style={{ fontSize: '12px' }}>生年月日（年）</label>
-            <select style={{ width: '100%', background: '#2d3748', color: 'white', padding: '8px' }}><option>1990</option></select>
-          </div>
-          <div><label style={{ fontSize: '12px' }}>月</label>
-            <select style={{ width: '100%', background: '#2d3748', color: 'white', padding: '8px' }}><option>1</option></select>
-          </div>
-          <div><label style={{ fontSize: '12px' }}>日</label>
-            <select style={{ width: '100%', background: '#2d3748', color: 'white', padding: '8px' }}><option>1</option></select>
-          </div>
-        </div>
-
-        {/* 下段フォーム */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '20px' }}>
-          <div><label style={{ fontSize: '12px' }}>血液型</label>
-            <select style={{ width: '100%', background: '#2d3748', color: 'white', padding: '8px' }}><option>不明</option></select>
-          </div>
-          <div><label style={{ fontSize: '12px' }}>星座</label>
-            <select style={{ width: '100%', background: '#2d3748', color: 'white', padding: '8px' }}><option>不明</option></select>
-          </div>
-          <div><label style={{ fontSize: '12px' }}>干支</label>
-            <select style={{ width: '100%', background: '#2d3748', color: 'white', padding: '8px' }}><option>不明</option></select>
-          </div>
-        </div>
-
-        {/* 占う日・残り回数 */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '20px', backgroundColor: '#171923', padding: '5px', borderRadius: '10px' }}>
-           <button style={{ flex: 1, background: '#4c51bf', border: 'none', color: 'white', padding: '10px', borderRadius: '8px' }}>今日</button>
-           <button style={{ flex: 1, background: 'transparent', border: 'none', color: '#718096', padding: '10px' }}>明日</button>
-           <span style={{ color: '#4fd1c5', fontSize: '12px' }}>本日の残り：5回</span>
-        </div>
-
-        <div style={{ textAlign: 'right', marginBottom: '20px' }}>
-          <button style={{ backgroundColor: '#2d3748', color: 'white', border: 'none', padding: '8px 20px', borderRadius: '8px' }}>入力を固定する</button>
-        </div>
-
-        {/* 運勢を占うボタン（グラデーション） */}
-        <button 
-          onClick={drawFortune}
-          style={{ 
-            width: '100%', padding: '15px', borderRadius: '10px', border: 'none', fontWeight: 'bold', fontSize: '18px', color: 'white',
-            background: 'linear-gradient(90deg, #ed64a6 0%, #667eea 50%, #00b5d8 100%)', cursor: 'pointer'
-          }}
-        >
-          運勢を占う
-        </button>
-      </div>
-
-      {/* 占い結果表示エリア */}
-      {result && (
-        <div style={{ marginTop: '20px', padding: '20px', background: 'rgba(255,255,255,0.1)', borderRadius: '10px', fontSize: '20px' }}>
-          {result}
+    <div className="min-h-screen bg-black text-white p-4 flex flex-col items-center relative">
+      {/* 自動保存完了のインジケーター */}
+      {autoSaveStatus && (
+        <div className="fixed bottom-6 right-6 z-[60] flex items-center space-x-2 bg-slate-900/90 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 shadow-2xl animate-fade-in">
+          <div className={`w-2 h-2 rounded-full ${autoSaveStatus === 'saved' ? 'bg-emerald-400 shadow-[0_0_8px_#34d399]' : 'bg-amber-400 animate-pulse'}`}></div>
+          <span className="text-[10px] font-bold text-gray-300 tracking-wider">
+            {autoSaveStatus === 'saved' ? '自動保存済み' : '保存中...'}
+          </span>
         </div>
       )}
 
-      {/* mike ver.1 ロゴ */}
-      <div style={{ marginTop: '40px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <div style={{ fontSize: '24px', fontWeight: 'bold' }}>
-          <span style={{ color: '#f6ad55' }}>m</span>
-          <span style={{ color: '#4fd1c5' }}>i</span>
-          <span style={{ color: '#f6e05e' }}>★</span>
-          <span style={{ color: '#667eea' }}>ke</span>
+      <header className="w-full max-w-2xl mb-10 mt-8 flex flex-col items-center space-y-4">
+        <div className="w-full flex justify-end"><Manual /></div>
+        <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-cyan-400 text-center">
+          AI Fortune Teller
+        </h1>
+      </header>
+
+      <main className="w-full max-w-2xl bg-white/5 p-6 rounded-2xl border border-white/10">
+        <FortuneForm
+          {...userInfo}
+          setName={() => {}}
+          setYear={(v) => setUserInfo(p => ({...p, year: v}))}
+          setMonth={(v) => setUserInfo(p => ({...p, month: v}))}
+          setDay={(v) => setUserInfo(p => ({...p, day: v}))}
+          setBloodType={(v) => setUserInfo(p => ({...p, bloodType: v}))}
+          setZodiacSign={(v) => setUserInfo(p => ({...p, zodiacSign: v}))}
+          setEto={(v) => setUserInfo(p => ({...p, eto: v}))}
+          handleSubmit={handleSubmit}
+          isLoading={isLoading}
+          isLocked={isLocked}
+          setIsLocked={handleLockToggle}
+          isFortuneForOthers={isFortuneForOthers}
+          onStartFortuneForOthers={handleStartOthers}
+          onReturnToMyInfo={handleReturnMyInfo}
+          targetDateType={targetDateType}
+          setTargetDateType={setTargetDateType}
+          usageCount={usageCount}
+          maxUsage={MAX_USAGE}
+        />
+        <div className="mt-8">
+          {isLoading && <Loader />}
+          {error && <p className="text-red-400 text-center">{error}</p>}
+          {fortune && <FortuneResultDisplay fortune={fortune} date={displayDate} name={userInfo.name} />}
         </div>
-        <span style={{ color: '#718096' }}>ver.1</span>
-      </div>
+      </main>
+      <footer className="mt-auto w-full"><Logo /></footer>
     </div>
   );
-}
+};
+
+export default App;
