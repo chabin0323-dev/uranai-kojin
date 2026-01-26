@@ -2,19 +2,43 @@
 @tailwind components;
 @tailwind utilities;
 
-/* 🌌 背景を強制的に漆黒にする */
-html, body {
-  background-color: #000000 !important;
+/* 🌌 全体の背景と文字色 */
+body {
+  background-color: #000000;
   color: #ffffff;
-  margin: 0;
-  padding: 0;
-  height: 100%;
+  font-family: sans-serif;
 }
 
-/* 🔮 文字を紫から水色のグラデーションにする */
+/* 🔮 見出しのグラデーション */
 h1 {
   background: linear-gradient(90deg, #a855f7 0%, #22d3ee 100%) !important;
   -webkit-background-clip: text !important;
   -webkit-text-fill-color: transparent !important;
-  display: inline-block;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+}
+
+/* ⌨️ 入力フォームとボタンの装飾 */
+input, select {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: white !important;
+  padding: 12px !important;
+  border-radius: 12px !important;
+  outline: none;
+}
+
+button {
+  background: linear-gradient(90deg, #9333ea, #0891b2) !important;
+  color: white !important;
+  font-weight: bold !important;
+  padding: 16px !important;
+  border-radius: 16px !important;
+  border: none !important;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+button:hover {
+  opacity: 0.9;
 }
