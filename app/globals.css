@@ -2,15 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  body {
-    @apply bg-black text-white antialiased;
-  }
+/* 🌌 背景を強制的に漆黒にする */
+html, body {
+  background-color: #000000 !important;
+  color: #ffffff;
+  margin: 0;
+  padding: 0;
+  height: 100%;
 }
 
-/* 文字をグラデーションにするための直接の命令 */
+/* 🔮 文字を紫から水色のグラデーションにする */
 h1 {
-  background: linear-gradient(to right, #a855f7, #22d3ee);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background: linear-gradient(90deg, #a855f7 0%, #22d3ee 100%) !important;
+  -webkit-background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  display: inline-block;
 }
