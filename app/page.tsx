@@ -1,26 +1,43 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import { Info, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Info, Loader2, Save, Lock, Unlock } from 'lucide-react';
 
-// 全てのデータと型を1枚に集約（ズレをゼロにする）
+// --- すべての部品をここに集結（1ミリのズレも許さない） ---
 const BLOOD_TYPES = ["A", "B", "O", "AB"];
 const ZODIAC_SIGNS = ["牡羊座", "牡牛座", "双子座", "蟹座", "獅子座", "乙女座", "天秤座", "蠍座", "射手座", "山羊座", "水瓶座", "魚座"];
 
 export default function App() {
   const [usageCount, setUsageCount] = useState(0);
-  const [result, setResult] = useState<string | null>(null);
+  const [result, setResult] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState<'saved' | 'saving' | null>('saved');
   const MAX_USAGE = 5;
 
-  const handleFortune = () => {
+  // 利用回数管理 (21:37:32のロジックを再現)
+  useEffect(() => {
+    const today = new Date().toLocaleDateString();
+    const stored = localStorage.getItem('fortune_usage');
+    if (stored) {
+      const { date, count } = JSON.parse(stored);
+      if (date === today) setUsageCount(count);
+    }
+  }, []);
+
+  const handleFortune = async () => {
     if (usageCount >= MAX_USAGE) return;
     setIsLoading(true);
+    setAutoSaveStatus('saving');
+    
+    // AI Studio の動きを再現
     setTimeout(() => {
-      setResult("今日のアドバイス：一歩踏み出す勇気が、素晴らしい未来を引き寄せます。");
-      setUsageCount(prev => prev + 1);
+      setResult({ overall: { text: "最高の一日になります！" }, luckyItem: "青いペン" });
+      const newCount = usageCount + 1;
+      setUsageCount(newCount);
+      localStorage.setItem('fortune_usage', JSON.stringify({ date: new Date().toLocaleDateString(), count: newCount }));
       setIsLoading(false);
-    }, 1000);
+      setAutoSaveStatus('saved');
+    }, 1500);
   };
 
   return (
@@ -29,19 +46,18 @@ export default function App() {
         AI Fortune Teller
       </h1>
       
-      <div className="w-full max-w-md bg-white/5 p-8 rounded-2xl border border-white/10 shadow-2xl space-y-6">
-        <div className="flex justify-between items-center text-xs font-bold text-cyan-400">
-          <span>本日の残り：{MAX_USAGE - usageCount} / {MAX_USAGE}回</span>
+      <div className="w-full max-w-md bg-white/5 p-8 rounded-2xl border border-white/10 space-y-6">
+        <div className="flex justify-between items-center text-xs text-cyan-400 font-bold">
+          <span>本日の残り回数：{MAX_USAGE - usageCount} / {MAX_USAGE}</span>
         </div>
 
-        <div className="space-y-4 text-sm">
-          <label className="text-gray-400 block text-center">占いたい方の情報を入力</label>
+        <div className="space-y-4">
           <input className="w-full bg-gray-800 p-3 rounded-lg border border-gray-700" placeholder="お名前" />
           <div className="grid grid-cols-2 gap-2">
-            <select className="bg-gray-800 p-3 rounded-lg border border-gray-700 text-gray-300">
+            <select className="bg-gray-800 p-3 rounded-lg border border-gray-700">
               {BLOOD_TYPES.map(t => <option key={t}>{t}型</option>)}
             </select>
-            <select className="bg-gray-800 p-3 rounded-lg border border-gray-700 text-gray-300">
+            <select className="bg-gray-800 p-3 rounded-lg border border-gray-700">
               {ZODIAC_SIGNS.map(s => <option key={s}>{s}</option>)}
             </select>
           </div>
@@ -50,21 +66,22 @@ export default function App() {
         <button 
           onClick={handleFortune}
           disabled={isLoading || usageCount >= MAX_USAGE}
-          className="w-full bg-gradient-to-r from-purple-600 to-cyan-600 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition-opacity disabled:opacity-30"
+          className="w-full bg-gradient-to-r from-purple-600 to-cyan-600 py-4 rounded-xl font-bold text-lg hover:opacity-90 disabled:opacity-30"
         >
-          {isLoading ? <Loader2 className="mx-auto animate-spin" /> : "今すぐ占う"}
+          {isLoading ? <Loader2 className="mx-auto animate-spin" /> : "鑑定を開始する"}
         </button>
 
         {result && (
-          <div className="mt-6 p-6 bg-purple-900/20 border-l-4 border-pink-500 rounded-lg animate-in fade-in slide-in-from-top-4">
-            <p className="text-center leading-relaxed text-purple-100">{result}</p>
+          <div className="mt-6 p-6 bg-purple-900/20 border-l-4 border-pink-500 rounded-lg">
+            <p className="text-center">{result.overall.text}</p>
           </div>
         )}
       </div>
 
-      <div className="fixed bottom-6 right-6 flex items-center gap-2 bg-slate-900/80 p-3 rounded-full border border-white/10 text-[10px] text-gray-400">
-        <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399]" />
-        自動保存済み
+      {/* 自動保存ステータス (21:38:30の見た目を再現) */}
+      <div className="fixed bottom-6 right-6 flex items-center gap-2 bg-slate-900/90 p-3 rounded-full border border-white/10 text-[10px] text-gray-300">
+        <div className={`w-2 h-2 rounded-full ${autoSaveStatus === 'saved' ? 'bg-emerald-400 shadow-[0_0_8px_#34d399]' : 'bg-amber-400 animate-pulse'}`} />
+        {autoSaveStatus === 'saved' ? '自動保存済み' : '保存中...'}
       </div>
     </div>
   );
