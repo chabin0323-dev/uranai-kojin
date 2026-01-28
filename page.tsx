@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
-import { GoogleGenerativeAI } from "@google-generative-ai/generative-ai";
+import React, { useState } from "react";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-export default function FortuneTeller() {
+export default function Home() {
   const [name, setName] = useState("");
   const [bloodType, setBloodType] = useState("A型");
   const [zodiac, setZodiac] = useState("牡羊座");
@@ -40,7 +40,7 @@ export default function FortuneTeller() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white p-8 font-sans flex flex-col items-center">
+    <main className="min-h-screen bg-black text-white p-8 font-sans flex flex-col items-center">
       <h1 className="text-3xl font-bold mb-8 text-purple-400">AI Fortune Teller</h1>
       
       <div className="bg-gray-900 p-6 rounded-lg shadow-xl w-full max-w-md border border-purple-500">
@@ -82,13 +82,11 @@ export default function FortuneTeller() {
         </button>
 
         {result && (
-          <div className="mt-6 p-4 bg-gray-800 rounded border-l-4 border-purple-500 animate-fade-in text-sm leading-relaxed">
+          <div className="mt-6 p-4 bg-gray-800 rounded border-l-4 border-purple-500 text-sm leading-relaxed">
             {result}
           </div>
         )}
       </div>
-      
-      <p className="mt-8 text-gray-500 text-xs">Gemini 1.5 Active残り：5 / 5回</p>
-    </div>
+    </main>
   );
 }
