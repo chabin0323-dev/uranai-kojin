@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.11.0",
-    "next": "15.1.7-canary.4",
+    "next": "https://git.io/next-latest",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "lucide-react": "0.474.0"
