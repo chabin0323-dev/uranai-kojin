@@ -24,7 +24,7 @@ export default function Home() {
 
     setLoading(true);
     try {
-      // Vercelの「金庫（環境変数）」からAPIキーを安全に読み込みます
+      // Vercelの環境変数からAPIキーを読み込み
       const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
       
       if (!apiKey) {
@@ -34,14 +34,13 @@ export default function Home() {
       }
 
       const genAI = new GoogleGenerativeAI(apiKey);
-      // 修正ポイント：404エラーを回避するため、最も標準的なモデル名に固定しました
+      // 修正ポイント：すべて「小文字」で指定（重要！）
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
       const prompt = `${name}さんは血液型が${bloodType}、星座が${zodiac}です。今日の運勢を100文字程度で、具体的かつ前向きに占ってください。`;
       const result = await model.generateContent(prompt);
       setResult(result.response.text());
     } catch (error: any) {
-      // エラーが発生した際に、原因が画面に表示されるようにしています
       setResult("通信に失敗しました。エラー詳細: " + error.message);
       console.error(error);
     }
@@ -62,7 +61,7 @@ export default function Home() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full bg-black border border-gray-700 rounded p-2 focus:ring-2 focus:ring-purple-500 text-white"
+              className="w-full bg-black border border-gray-700 rounded p-2 text-white"
               placeholder="例：タナカ"
             />
           </div>
@@ -97,14 +96,14 @@ export default function Home() {
           <button
             onClick={tellFortune}
             disabled={loading}
-            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-3 rounded-lg transition duration-200 disabled:opacity-50"
+            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white font-bold py-3 rounded-lg disabled:opacity-50"
           >
             {loading ? "鑑定中..." : "鑑定を開始する"}
           </button>
         </div>
 
         {result && (
-          <div className="bg-gray-900 p-6 rounded-xl border border-purple-500/50 animate-fade-in text-center">
+          <div className="bg-gray-900 p-6 rounded-xl border border-purple-500/50 text-center">
             <h2 className="text-xl font-bold mb-3 text-purple-400">鑑定結果</h2>
             <p className="leading-relaxed text-gray-200">{result}</p>
           </div>
