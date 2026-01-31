@@ -24,7 +24,7 @@ export default function Home() {
     setLoading(true);
     try {
       // VercelのEnvironment Variablesに設定したAPIキーを読み込みます
-      const apiKey = process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY;
+      const apiKey = "AIzaSyCdoBchk09cl5fwd4Q5gJmgETQZdOcHN20";
       if (!apiKey) throw new Error("APIキーが設定されていません");
 
       const genAI = new GoogleGenerativeAI(apiKey);
