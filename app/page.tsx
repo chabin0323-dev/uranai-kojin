@@ -24,17 +24,23 @@ export default function Home() {
 
     setLoading(true);
     try {
-      // あなたの有料版APIキーを直接書き込んでいます
-      const apiKey = "AIzaSyCdoBchk09c15fwd4Q5gJMgETQZdOCHN20";
+      // APIキーをGitHubに直接書かず、Vercelの「金庫（Environment Variables）」から読み込みます
+      const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
       
+      if (!apiKey) {
+        setResult("APIキーが設定されていません。VercelのSettingsを確認してください。");
+        setLoading(false);
+        return;
+      }
+
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
       const prompt = `${name}さんは血液型が${bloodType}、星座が${zodiac}です。今日の運勢を100文字程度で、具体的かつ前向きに占ってください。`;
       const result = await model.generateContent(prompt);
       setResult(result.response.text());
-    } catch (error) {
-      setResult("通信に失敗しました。Logsを確認してください。");
+    } catch (error: any) {
+      setResult("通信に失敗しました。エラー詳細: " + error.message);
       console.error(error);
     }
     setLoading(false);
@@ -96,7 +102,7 @@ export default function Home() {
         </div>
 
         {result && (
-          <div className="bg-gray-900 p-6 rounded-xl border border-purple-500/50 animate-fade-in">
+          <div className="bg-gray-900 p-6 rounded-xl border border-purple-500/50 animate-fade-in text-center">
             <h2 className="text-xl font-bold mb-3 text-purple-400">鑑定結果</h2>
             <p className="leading-relaxed text-gray-200">{result}</p>
           </div>
