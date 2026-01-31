@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState } from "react";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export default function Home() {
@@ -21,75 +21,87 @@ export default function Home() {
       alert("お名前を入力してください");
       return;
     }
+
     setLoading(true);
     try {
-      // VercelのEnvironment Variablesに設定したAPIキーを読み込みます
-      const apiKey = "AIzaSyCdoBchk09cl5fwd4Q5gJmgETQZdOcHN20";
-      if (!apiKey) throw new Error("APIキーが設定されていません");
-
+      // あなたの有料版APIキーを直接書き込んでいます
+      const apiKey = "AIzaSyCdoBchk09c15fwd4Q5gJMgETQZdOCHN20";
+      
       const genAI = new GoogleGenerativeAI(apiKey);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      
+
       const prompt = `${name}さんは血液型が${bloodType}、星座が${zodiac}です。今日の運勢を100文字程度で、具体的かつ前向きに占ってください。`;
       const result = await model.generateContent(prompt);
       setResult(result.response.text());
     } catch (error) {
-      setResult("占いに失敗しました。VercelのAPIキー設定（Environment Variables）を確認してください。");
+      setResult("通信に失敗しました。Logsを確認してください。");
       console.error(error);
     }
     setLoading(false);
   };
 
   return (
-    <main className="min-h-screen bg-black text-white p-8 font-sans flex flex-col items-center">
-      <h1 className="text-3xl font-bold mb-8 text-purple-400">Gemini AI 占い師</h1>
-      
-      <div className="bg-gray-900 p-6 rounded-lg shadow-xl w-full max-w-md border border-purple-500">
-        <div className="mb-4">
-          <label className="block text-sm mb-1 text-gray-400">お名前</label>
-          <input 
-            className="w-full p-2 rounded bg-gray-800 border border-gray-700 text-white focus:border-purple-500 outline-none"
-            type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="例：タナカ"
-          />
-        </div>
+    <main className="min-h-screen bg-black text-white p-8 font-sans">
+      <div className="max-w-md mx-auto space-y-8">
+        <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-600">
+          Gemini AI 占い師
+        </h1>
 
-        <div className="flex gap-4 mb-6">
-          <div className="flex-1">
-            <label className="block text-sm mb-1 text-gray-400">血液型</label>
-            <select 
-              className="w-full p-2 rounded bg-gray-800 border border-gray-700 text-white"
-              value={bloodType} onChange={(e) => setBloodType(e.target.value)}
-            >
-              {bloodTypes.map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
+        <div className="space-y-4 bg-gray-900 p-6 rounded-xl border border-gray-800">
+          <div>
+            <label className="block text-sm font-medium mb-1">お名前</label>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full bg-black border border-gray-700 rounded p-2 focus:ring-2 focus:ring-purple-500"
+              placeholder="例：タナカ"
+            />
           </div>
-          <div className="flex-1">
-            <label className="block text-sm mb-1 text-gray-400">星座</label>
-            <select 
-              className="w-full p-2 rounded bg-gray-800 border border-gray-700 text-white"
-              value={zodiac} onChange={(e) => setZodiac(e.target.value)}
-            >
-              {zodiacSigns.map(s => <option key={s} value={s}>{s}</option>)}
-            </select>
-          </div>
-        </div>
 
-        <button 
-          onClick={tellFortune}
-          disabled={loading}
-          className="w-full bg-purple-600 hover:bg-purple-700 p-3 rounded-lg font-bold transition-all disabled:bg-gray-600 active:scale-95"
-        >
-          {loading ? "宇宙と交信中..." : "鑑定を開始する"}
-        </button>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium mb-1">血液型</label>
+              <select
+                value={bloodType}
+                onChange={(e) => setBloodType(e.target.value)}
+                className="w-full bg-black border border-gray-700 rounded p-2"
+              >
+                {bloodTypes.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium mb-1">星座</label>
+              <select
+                value={zodiac}
+                onChange={(e) => setZodiac(e.target.value)}
+                className="w-full bg-black border border-gray-700 rounded p-2"
+              >
+                {zodiacSigns.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <button
+            onClick={tellFortune}
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white font-bold py-3 rounded-lg transition duration-200 disabled:opacity-50"
+          >
+            {loading ? "鑑定中..." : "鑑定を開始する"}
+          </button>
+        </div>
 
         {result && (
-          <div className="mt-6 p-4 bg-gray-800 rounded border-l-4 border-purple-500 text-sm leading-relaxed animate-pulse">
-            <p className="text-gray-200">{result}</p>
+          <div className="bg-gray-900 p-6 rounded-xl border border-purple-500/50 animate-fade-in">
+            <h2 className="text-xl font-bold mb-3 text-purple-400">鑑定結果</h2>
+            <p className="leading-relaxed text-gray-200">{result}</p>
           </div>
         )}
       </div>
     </main>
   );
 }
-// cache clear test
-
