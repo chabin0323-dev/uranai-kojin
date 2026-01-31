@@ -34,8 +34,8 @@ export default function Home() {
       }
 
       const genAI = new GoogleGenerativeAI(apiKey);
-      // 修正ポイント：モデル名を最新の "-latest" に変更しました
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+      // 修正ポイント：404エラーを回避するため、最も標準的なモデル名に固定しました
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
       const prompt = `${name}さんは血液型が${bloodType}、星座が${zodiac}です。今日の運勢を100文字程度で、具体的かつ前向きに占ってください。`;
       const result = await model.generateContent(prompt);
@@ -57,7 +57,7 @@ export default function Home() {
 
         <div className="space-y-4 bg-gray-900 p-6 rounded-xl border border-gray-800">
           <div>
-            <label className="block text-sm font-medium mb-1">お名前</label>
+            <label className="block text-sm font-medium mb-1 text-gray-300">お名前</label>
             <input
               type="text"
               value={name}
@@ -69,7 +69,7 @@ export default function Home() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium mb-1">血液型</label>
+              <label className="block text-sm font-medium mb-1 text-gray-300">血液型</label>
               <select
                 value={bloodType}
                 onChange={(e) => setBloodType(e.target.value)}
@@ -81,7 +81,7 @@ export default function Home() {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium mb-1">星座</label>
+              <label className="block text-sm font-medium mb-1 text-gray-300">星座</label>
               <select
                 value={zodiac}
                 onChange={(e) => setZodiac(e.target.value)}
