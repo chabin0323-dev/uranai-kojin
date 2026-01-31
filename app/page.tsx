@@ -24,7 +24,7 @@ export default function Home() {
 
     setLoading(true);
     try {
-      // APIキーをGitHubに直接書かず、Vercelの「金庫（Environment Variables）」から読み込みます
+      // Vercelの「金庫（環境変数）」からAPIキーを安全に読み込みます
       const apiKey = process.env.NEXT_PUBLIC_GEMINI_API_KEY;
       
       if (!apiKey) {
@@ -34,12 +34,14 @@ export default function Home() {
       }
 
       const genAI = new GoogleGenerativeAI(apiKey);
-      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      // 修正ポイント：モデル名を最新の "-latest" に変更しました
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
       const prompt = `${name}さんは血液型が${bloodType}、星座が${zodiac}です。今日の運勢を100文字程度で、具体的かつ前向きに占ってください。`;
       const result = await model.generateContent(prompt);
       setResult(result.response.text());
     } catch (error: any) {
+      // エラーが発生した際に、原因が画面に表示されるようにしています
       setResult("通信に失敗しました。エラー詳細: " + error.message);
       console.error(error);
     }
@@ -60,7 +62,7 @@ export default function Home() {
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full bg-black border border-gray-700 rounded p-2 focus:ring-2 focus:ring-purple-500"
+              className="w-full bg-black border border-gray-700 rounded p-2 focus:ring-2 focus:ring-purple-500 text-white"
               placeholder="例：タナカ"
             />
           </div>
@@ -71,7 +73,7 @@ export default function Home() {
               <select
                 value={bloodType}
                 onChange={(e) => setBloodType(e.target.value)}
-                className="w-full bg-black border border-gray-700 rounded p-2"
+                className="w-full bg-black border border-gray-700 rounded p-2 text-white"
               >
                 {bloodTypes.map((t) => (
                   <option key={t} value={t}>{t}</option>
@@ -83,7 +85,7 @@ export default function Home() {
               <select
                 value={zodiac}
                 onChange={(e) => setZodiac(e.target.value)}
-                className="w-full bg-black border border-gray-700 rounded p-2"
+                className="w-full bg-black border border-gray-700 rounded p-2 text-white"
               >
                 {zodiacSigns.map((s) => (
                   <option key={s} value={s}>{s}</option>
