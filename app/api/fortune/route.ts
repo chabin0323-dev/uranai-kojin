@@ -7,26 +7,30 @@ export async function POST(req: Request) {
     const genAI = new GoogleGenerativeAI(process.env.API_KEY || "");
     const model = genAI.getGenerativeModel({ model: "gemini-3-flash-preview" });
 
-    // AI Studioの設定をここに集約
-    const result = await model.generateContent({
-      contents: [{ role: "user", parts: [{ text: `${name}さん(${dob}型)の今日の運勢を占ってください。` }] }],
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: "object",
-          properties: {
-            overall: { type: "object", properties: { luck: { type: "integer" }, text: { type: "string" } } },
-            luckyItem: { type: "string" },
-            luckyNumber: { type: "string" }
-          },
-          required: ["overall", "luckyItem", "luckyNumber"]
-        }
-      }
-    });
+    // 命令文（プロンプト）の中で、出力形式を徹底的に指定します
+    const prompt = `
+    あなたはプロの占い師です。以下の情報を元に今日の運勢を占ってください。
+    占う人：${name}さん (生年月日: ${dob}、血液型: ${bloodType}型)
 
-    const response = await result.response;
-    return NextResponse.json(JSON.parse(response.text()));
+    必ず以下のJSON形式でのみ返答してください。余計な説明は一切不要です。
+    {
+      "overall": { "luck": 80, "text": "ここに鑑定文を40文字以内で記述" },
+      "luckyItem": "ラッキーアイテム名",
+      "luckyNumber": "7"
+    }
+    `;
+
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+    
+    // JSON部分だけを抽出する安全な処理
+    const jsonStart = text.indexOf("{");
+    const jsonEnd = text.lastIndexOf("}") + 1;
+    const jsonContent = JSON.parse(text.substring(jsonStart, jsonEnd));
+
+    return NextResponse.json(jsonContent);
   } catch (error) {
-    return NextResponse.json({ error: "API Error" }, { status: 500 });
+    console.error(error);
+    return NextResponse.json({ error: "鑑定エラー" }, { status: 500 });
   }
 }
