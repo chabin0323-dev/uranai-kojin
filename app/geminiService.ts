@@ -1,12 +1,24 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export async function getFortune(name: string, dob: string, bloodType: string) {
+  // 1. キーの読み込み（Vercelの設定と一致している必要があります）
   const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || "");
+  
+  // 2. モデルの指定（現在最も安定しているモデルです）
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-  const prompt = `${name}さん、生年月日${dob}、血液型${bloodType}の運勢を占って、{"score": 数値, "summary": "一言", "advice": "詳細"}のJSON形式で返して。`;
+  // 3. 以前成功した時のような、最もシンプルなプロンプト
+  const prompt = `${name}さんの今日の運勢を占って、結果を教えてください。`;
 
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  return JSON.parse(response.text().replace(/```json|```/g, ""));
+  try {
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const text = response.text();
+    
+    // 以前のように、JSON解析をせずにそのままテキストを返す設定にします
+    return { score: "??", advice: text };
+  } catch (error) {
+    console.error("API Error:", error);
+    throw error;
+  }
 }
