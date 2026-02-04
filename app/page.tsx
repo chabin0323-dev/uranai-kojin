@@ -29,100 +29,86 @@ export default function Home() {
   };
 
   return (
-    <main style={{ backgroundColor: "#000", minHeight: "100vh", color: "#fff", padding: "20px", fontFamily: "'Helvetica Neue', Arial, sans-serif" }}>
-      <div style={{ maxWidth: "550px", margin: "0 auto" }}>
-        {/* 右上のボタン */}
+    <main style={{ backgroundColor: "#000", minHeight: "100vh", color: "#fff", padding: "20px", fontFamily: "sans-serif" }}>
+      <div style={{ maxWidth: "500px", margin: "0 auto" }}>
+        
+        {/* 右上の取扱説明書ボタン */}
         <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "20px" }}>
-          <button style={{ backgroundColor: "#222", color: "#fff", border: "1px solid #444", padding: "6px 12px", borderRadius: "8px", fontSize: "12px", display: "flex", alignItems: "center", gap: "5px" }}>
-            <span style={{ fontSize: "16px" }}>📖</span> 取扱説明書
+          <button style={{ backgroundColor: "#1e293b", color: "#fff", border: "1px solid #334155", padding: "5px 15px", borderRadius: "8px", fontSize: "12px", display: "flex", alignItems: "center", gap: "5px" }}>
+            <span style={{ backgroundColor: "#6366f1", borderRadius: "3px", padding: "0 3px" }}>📖</span> 取扱説明書
           </button>
         </div>
         
-        {/* タイトル */}
-        <h1 style={{ textAlign: "center", fontSize: "36px", fontWeight: "normal", color: "#a5f3fc", margin: "40px 0", letterSpacing: "1px" }}>
+        {/* タイトルロゴ */}
+        <h1 style={{ textAlign: "center", fontSize: "38px", color: "#8be9fd", fontWeight: "bold", margin: "30px 0", textShadow: "0 0 10px rgba(139, 233, 253, 0.3)" }}>
           AI Fortune Teller
         </h1>
         
-        {/* メインパネル */}
-        <div style={{ backgroundColor: "#111", padding: "30px", borderRadius: "20px", border: "1px solid #222", boxShadow: "0 10px 30px rgba(0,0,0,0.5)" }}>
-          <h2 style={{ textAlign: "center", color: "#fbcfe8", fontSize: "20px", marginBottom: "30px", fontWeight: "normal" }}>
+        {/* 入力フォームエリア */}
+        <div style={{ backgroundColor: "#0f172a", padding: "25px", borderRadius: "15px", border: "1px solid #1e293b" }}>
+          <h2 style={{ textAlign: "center", color: "#f9a8d4", fontSize: "18px", marginBottom: "25px" }}>
             占いたい方の情報を入力して下さい
           </h2>
           
-          {/* 名前入力 */}
-          <div style={{ marginBottom: "25px" }}>
-            <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", color: "#ccc" }}>氏名</label>
+          {/* 氏名 */}
+          <div style={{ marginBottom: "20px" }}>
+            <label style={{ color: "#94a3b8", fontSize: "14px", display: "block", marginBottom: "8px" }}>氏名</label>
             <input 
               type="text" 
-              placeholder="お名前を入力"
+              placeholder="セキュリティ保護のため入力不可"
               value={name} 
               onChange={(e) => setName(e.target.value)}
-              style={{ width: "100%", padding: "12px", backgroundColor: "#080808", border: "1px solid #1e293b", borderRadius: "8px", color: "#fff", outline: "none" }} 
+              style={{ width: "100%", padding: "12px", backgroundColor: "#020617", border: "1px solid #334155", borderRadius: "8px", color: "#fff" }} 
             />
           </div>
 
-          {/* 生年月日 */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "15px", marginBottom: "25px" }}>
+          {/* 生年月日一行目 */}
+          <div style={{ marginBottom: "20px" }}>
+             <label style={{ color: "#94a3b8", fontSize: "14px", display: "block", marginBottom: "8px" }}>生年月日</label>
+             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px" }}>
+                <select value={year} onChange={(e) => setYear(e.target.value)} style={{ padding: "12px", backgroundColor: "#020617", color: "#fff", border: "1px solid #334155", borderRadius: "8px" }}><option value="1995">1995</option></select>
+                <select value={month} onChange={(e) => setMonth(e.target.value)} style={{ padding: "12px", backgroundColor: "#020617", color: "#fff", border: "1px solid #334155", borderRadius: "8px" }}><option value="10">10</option></select>
+                <select value={day} onChange={(e) => setDay(e.target.value)} style={{ padding: "12px", backgroundColor: "#020617", color: "#fff", border: "1px solid #334155", borderRadius: "8px" }}><option value="7">7</option></select>
+             </div>
+          </div>
+
+          {/* 下段（血液型・星座・干支） */}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px", marginBottom: "25px" }}>
             <div>
-              <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", color: "#ccc" }}>生年月日</label>
-              <select value={year} onChange={(e) => setYear(e.target.value)} style={{ width: "100%", padding: "12px", backgroundColor: "#080808", color: "#fff", border: "1px solid #1e293b", borderRadius: "8px" }}>
-                <option value="1995">1995</option>
-              </select>
+              <label style={{ color: "#94a3b8", fontSize: "12px", display: "block", marginBottom: "5px" }}>血液型</label>
+              <select value={bloodType} onChange={(e) => setBloodType(e.target.value)} style={{ width: "100%", padding: "12px", backgroundColor: "#020617", color: "#fff", border: "1px solid #334155", borderRadius: "8px" }}><option value="B">B型</option></select>
             </div>
             <div>
-              <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", color: "#ccc" }}>月</label>
-              <select value={month} onChange={(e) => setMonth(e.target.value)} style={{ width: "100%", padding: "12px", backgroundColor: "#080808", color: "#fff", border: "1px solid #1e293b", borderRadius: "8px" }}>
-                <option value="10">10</option>
-              </select>
+              <label style={{ color: "#94a3b8", fontSize: "12px", display: "block", marginBottom: "5px" }}>星座</label>
+              <select style={{ width: "100%", padding: "12px", backgroundColor: "#020617", color: "#fff", border: "1px solid #334155", borderRadius: "8px" }}><option>天秤座</option></select>
             </div>
             <div>
-              <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", color: "#ccc" }}>日</label>
-              <select value={day} onChange={(e) => setDay(e.target.value)} style={{ width: "100%", padding: "12px", backgroundColor: "#080808", color: "#fff", border: "1px solid #1e293b", borderRadius: "8px" }}>
-                <option value="7">7</option>
-              </select>
+              <label style={{ color: "#94a3b8", fontSize: "12px", display: "block", marginBottom: "5px" }}>干支</label>
+              <select style={{ width: "100%", padding: "12px", backgroundColor: "#020617", color: "#fff", border: "1px solid #334155", borderRadius: "8px" }}><option>亥（い）</option></select>
             </div>
           </div>
 
-          {/* 血液型・星座・干支 */}
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "15px", marginBottom: "30px" }}>
-            <div>
-              <label style={{ display: "block", marginBottom: "8px", fontSize: "14px", color: "#ccc" }}>血液型</label>
-              <select value={bloodType} onChange={(e) => setBloodType(e.target.value)} style={{ width: "100%", padding: "12px", backgroundColor: "#080808", color: "#fff", border: "1px solid #1e293b", borderRadius: "8px" }}>
-                <option value="B">B型</option>
-                <option value="A">A型</option>
-                <option value="O">O型</option>
-                <option value="AB">AB型</option>
-              </select>
-            </div>
-            <div><label style={{ display: "block", marginBottom: "8px", fontSize: "14px", color: "#ccc" }}>星座</label><select style={{ width: "100%", padding: "12px", backgroundColor: "#080808", color: "#fff", border: "1px solid #1e293b", borderRadius: "8px" }}><option>天秤座</option></select></div>
-            <div><label style={{ display: "block", marginBottom: "8px", fontSize: "14px", color: "#ccc" }}>干支</label><select style={{ width: "100%", padding: "12px", backgroundColor: "#080808", color: "#fff", border: "1px solid #1e293b", borderRadius: "8px" }}><option>亥（い）</option></select></div>
-          </div>
+          <p style={{ color: "#2dd4bf", fontSize: "13px", marginBottom: "20px" }}>本日の残り利用回数：5回</p>
 
-          <p style={{ color: "#22d3ee", fontSize: "14px", marginBottom: "20px" }}>本日の残り利用回数：5回</p>
-
-          {/* 占うボタン */}
+          {/* 占うボタン（グラデーション） */}
           <button 
             onClick={handleFortune}
             disabled={loading}
             style={{ 
               width: "100%", padding: "16px", borderRadius: "12px", border: "none", fontSize: "18px", fontWeight: "bold",
-              background: "linear-gradient(to right, #a855f7, #ec4899, #06b6d4)", color: "#fff", cursor: "pointer",
-              boxShadow: "0 4px 15px rgba(236, 72, 153, 0.3)"
+              background: "linear-gradient(to right, #d946ef, #ec4899, #06b6d4)", color: "#fff", cursor: "pointer"
             }}
           >
             {loading ? "鑑定中..." : "運勢を占う"}
           </button>
         </div>
 
-        {/* 結果表示エリア */}
+        {/* 鑑定結果表示 */}
         {result && (
-          <div style={{ marginTop: "30px", padding: "25px", backgroundColor: "#e0f2fe", borderRadius: "15px", color: "#333", border: "1px solid #bae6fd" }}>
-            <h3 style={{ textAlign: "center", color: "#0369a1", margin: "0 0 15px 0" }}>鑑定結果: {result.overall.luck} / 5</h3>
-            <p style={{ textAlign: "center", fontSize: "18px", lineHeight: "1.6", margin: "0" }}>{result.overall.text}</p>
-            <div style={{ borderTop: "1px solid #bae6fd", marginTop: "15px", paddingTop: "15px", display: "flex", justifyContent: "space-around", fontSize: "14px" }}>
-              <span>🌟 アイテム: <strong>{result.luckyItem}</strong></span>
-              <span>🔢 ナンバー: <strong>{result.luckyNumber}</strong></span>
-            </div>
+          <div style={{ marginTop: "30px", padding: "20px", backgroundColor: "#fff", borderRadius: "15px", color: "#111" }}>
+            <h3 style={{ textAlign: "center", color: "#ec4899", margin: "0 0 10px 0" }}>鑑定結果</h3>
+            <p style={{ textAlign: "center", fontSize: "20px", fontWeight: "bold" }}>{result.overall.luck}点 / 5点</p>
+            <p style={{ lineHeight: "1.6" }}>{result.overall.text}</p>
           </div>
         )}
       </div>
