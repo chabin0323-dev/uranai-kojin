@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { getFortune } from "./services/geminiService";
+import { getFortune } from "./geminiService"; // さきほど作ったファイルに直結
 
 export default function Home() {
   const [name, setName] = useState("");
@@ -14,11 +14,10 @@ export default function Home() {
     setLoading(true);
     setError("");
     try {
-      // 先ほど作った geminiService を呼び出します
       const data = await getFortune(name, dob, bloodType);
       setResult(data);
     } catch (err) {
-      setError("通信エラーが発生しました。APIキーや制限を確認してください。");
+      setError("通信エラーが発生しました。");
     } finally {
       setLoading(false);
     }
@@ -26,21 +25,17 @@ export default function Home() {
 
   return (
     <main style={{ padding: "20px", maxWidth: "400px", margin: "0 auto" }}>
-      <h1>個人占い</h1>
-      <input type="text" placeholder="名前" onChange={(e) => setName(e.target.value)} style={{ display: "block", marginBottom: "10px", width: "100%" }} />
+      <h1>個人占い（復旧版）</h1>
+      <input type="text" placeholder="お名前" onChange={(e) => setName(e.target.value)} style={{ display: "block", marginBottom: "10px", width: "100%" }} />
       <input type="date" onChange={(e) => setDob(e.target.value)} style={{ display: "block", marginBottom: "10px", width: "100%" }} />
-      <select onChange={(e) => setBloodType(e.target.value)} style={{ display: "block", marginBottom: "10px", width: "100%" }}>
-        <option value="A">A型</option><option value="B">B型</option><option value="O">O型</option><option value="AB">AB型</option>
-      </select>
-      <button onClick={handleFortune} disabled={loading} style={{ width: "100%", padding: "10px", background: "#0070f3", color: "white", border: "none", borderRadius: "5px" }}>
+      <button onClick={handleFortune} disabled={loading} style={{ width: "100%", padding: "10px", background: "#0070f3", color: "white" }}>
         {loading ? "鑑定中..." : "占う"}
       </button>
 
       {error && <p style={{ color: "red" }}>{error}</p>}
       {result && (
-        <div style={{ marginTop: "20px", borderTop: "1px solid #ccc", paddingTop: "20px" }}>
-          <h2>鑑定結果: {result.score}点</h2>
-          <p><strong>要約:</strong> {result.summary}</p>
+        <div style={{ marginTop: "20px" }}>
+          <h2>結果: {result.score}点</h2>
           <p>{result.advice}</p>
         </div>
       )}
