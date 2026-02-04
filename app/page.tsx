@@ -8,38 +8,33 @@ export default function Home() {
   const [bloodType, setBloodType] = useState("A");
   const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
 
   const handleFortune = async () => {
     setLoading(true);
-    setError("");
     try {
       const data = await getFortune(name, dob, bloodType);
       setResult(data);
     } catch (err) {
-      setError("通信エラーが発生しました。");
+      alert("通信エラーが発生しました。");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <main style={{ padding: "20px", maxWidth: "400px", margin: "0 auto", textAlign: "center" }}>
-      <h1>個人占い（復活版）</h1>
-      <input type="text" placeholder="名前" onChange={(e) => setName(e.target.value)} style={{ display: "block", marginBottom: "10px", width: "100%" }} />
-      <input type="date" onChange={(e) => setDob(e.target.value)} style={{ display: "block", marginBottom: "10px", width: "100%" }} />
-      <button onClick={handleFortune} disabled={loading} style={{ width: "100%", padding: "10px", background: "#0070f3", color: "white" }}>
+    <div style={{ padding: "20px" }}>
+      <h1>個人占い</h1>
+      <input type="text" placeholder="名前" onChange={(e) => setName(e.target.value)} />
+      <input type="date" onChange={(e) => setDob(e.target.value)} />
+      <button onClick={handleFortune} disabled={loading}>
         {loading ? "鑑定中..." : "占う"}
       </button>
-
-      {error && <p style={{ color: "red" }}>{error}</p>}
       {result && (
-        <div style={{ marginTop: "20px", border: "1px solid #ccc", padding: "10px" }}>
+        <div>
           <h2>{result.score}点</h2>
-          <p><strong>{result.summary}</strong></p>
           <p>{result.advice}</p>
         </div>
       )}
-    </main>
+    </div>
   );
 }
