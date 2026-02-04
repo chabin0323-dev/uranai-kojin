@@ -1,22 +1,12 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-export async function getFortune(name: string, dob: string, bloodType: string): Promise<any> {
+export async function getFortune(name: string, dob: string, bloodType: string) {
   const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || "");
   const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-  const prompt = `${name}さん（生年月日:${dob}、血液型:${bloodType}）の今日の運勢を占ってください。結果は必ず {"score": 80, "summary": "良い一日", "advice": "自信を持って進みましょう"} という形式のJSONデータのみで返してください。`;
+  const prompt = `${name}さん、生年月日${dob}、血液型${bloodType}の運勢を占って、{"score": 数値, "summary": "一言", "advice": "詳細"}のJSON形式で返して。`;
 
-  try {
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const text = response.text();
-    
-    // エラーの原因だった特殊な書き方を避け、シンプルな解析に変更
-    const start = text.indexOf('{');
-    const end = text.lastIndexOf('}') + 1;
-    return JSON.parse(text.substring(start, end));
-  } catch (error) {
-    console.error("Gemini API Error:", error);
-    throw error;
-  }
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  return JSON.parse(response.text().replace(/```json|```/g, ""));
 }
