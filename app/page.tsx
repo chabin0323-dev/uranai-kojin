@@ -9,7 +9,7 @@ export default function Home() {
   const [bloodType, setBloodType] = useState("B");
   const [sign, setSign] = useState("天秤座");
   const [zodiac, setZodiac] = useState("亥（い）");
-  const [targetDate, setTargetDate] = useState("今日");
+  const [targetDate, setTargetDate] = useState("今日"); // 今日・明日切り替え用
   const [isFixed, setIsFixed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
@@ -23,7 +23,7 @@ export default function Home() {
     color: "#fff",
     cursor: isFixed ? "not-allowed" : "pointer",
     position: "relative",
-    zIndex: 20, // 重なり順をさらに強化
+    zIndex: 20,
     WebkitAppearance: "menulist",
   };
 
@@ -52,12 +52,10 @@ export default function Home() {
             <input type="text" disabled={isFixed} value={name} onChange={(e)=>setName(e.target.value)} style={inputStyle} />
           </div>
 
-          {/* 生年月日セクション：ここを重点的に修正 */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px", marginBottom: "15px" }}>
             <div>
               <label style={{ fontSize: "12px", color: "#94a3b8", display: "block", marginBottom: "5px" }}>生年月日(年)</label>
               <select disabled={isFixed} value={year} onChange={(e)=>setYear(e.target.value)} style={inputStyle}>
-                {/* 1926年から2026年まで手動に近い形で生成 */}
                 {Array.from({length: 101}, (_, i) => 2026 - i).map(y => (
                   <option key={y} value={y} style={{backgroundColor: "#111"}}>{y}</option>
                 ))}
@@ -81,7 +79,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* 血液型・星座・干支（これらは機能しているとのことなのでスタイル維持） */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px", marginBottom: "20px" }}>
             <div><label style={{ fontSize: "12px", color: "#94a3b8" }}>血液型</label>
               <select disabled={isFixed} value={bloodType} onChange={(e)=>setBloodType(e.target.value)} style={inputStyle}>
@@ -100,17 +97,34 @@ export default function Home() {
             </div>
           </div>
 
+          {/* ★復活した「今日・明日」切り替えボタン */}
+          <div style={{ marginBottom: "20px" }}>
+            <label style={{ color: "#ccc", fontSize: "14px", display: "block", marginBottom: "8px" }}>占う日</label>
+            <div style={{ display: "flex", gap: "10px" }}>
+              <button onClick={()=>setTargetDate("今日")} style={{ flex: 1, padding: "10px", borderRadius: "8px", border: "none", backgroundColor: targetDate === "今日" ? "#4f46e5" : "#1e293b", color: "#fff", cursor: "pointer", position: "relative", zIndex: 25 }}>今日</button>
+              <button onClick={()=>setTargetDate("明日")} style={{ flex: 1, padding: "10px", borderRadius: "8px", border: "none", backgroundColor: targetDate === "明日" ? "#4f46e5" : "#1e293b", color: "#fff", cursor: "pointer", position: "relative", zIndex: 25 }}>明日</button>
+            </div>
+          </div>
+
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
             <p style={{ color: "#22d3ee", fontSize: "13px" }}>本日の残り利用回数：5回</p>
-            <button onClick={() => setIsFixed(!isFixed)} style={{ backgroundColor: "#334155", color: "#fff", border: "none", padding: "8px 16px", borderRadius: "8px", fontSize: "13px", cursor: "pointer" }}>
+            <button onClick={() => setIsFixed(!isFixed)} style={{ backgroundColor: "#334155", color: "#fff", border: "none", padding: "8px 16px", borderRadius: "8px", fontSize: "13px", cursor: "pointer", position: "relative", zIndex: 25 }}>
               {isFixed ? "入力を解除する" : "入力を固定する"}
             </button>
           </div>
 
-          <button onClick={handleFortune} disabled={loading} style={{ width: "100%", padding: "16px", borderRadius: "12px", border: "none", fontSize: "18px", fontWeight: "bold", background: "linear-gradient(to right, #a855f7, #ec4899, #06b6d4)", color: "#fff", cursor: "pointer" }}>
+          <button onClick={handleFortune} disabled={loading} style={{ width: "100%", padding: "16px", borderRadius: "12px", border: "none", fontSize: "18px", fontWeight: "bold", background: "linear-gradient(to right, #a855f7, #ec4899, #06b6d4)", color: "#fff", cursor: "pointer", position: "relative", zIndex: 25 }}>
             {loading ? "鑑定中..." : "運勢を占う"}
           </button>
         </div>
+
+        {result && (
+          <div style={{ marginTop: "20px", padding: "20px", backgroundColor: "#111", borderRadius: "15px", border: "1px solid #333" }}>
+            <h3 style={{ textAlign: "center", color: "#fbcfe8" }}>{targetDate}の鑑定結果</h3>
+            <p style={{ textAlign: "center", fontSize: "24px", color: "#8be9fd", fontWeight: "bold" }}>{result.overall.luck}点</p>
+            <p style={{ lineHeight: "1.6", margin: "15px 0", color: "#eee" }}>{result.overall.text}</p>
+          </div>
+        )}
       </div>
     </main>
   );
