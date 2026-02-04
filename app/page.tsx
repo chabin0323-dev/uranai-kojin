@@ -14,7 +14,6 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<any>(null);
 
-  // 共通の入力スタイル（PCでのクリックを確実にするための設定追加）
   const inputStyle: React.CSSProperties = {
     width: "100%",
     padding: "12px",
@@ -22,11 +21,10 @@ export default function Home() {
     border: "1px solid #1e293b",
     borderRadius: "8px",
     color: "#fff",
-    cursor: isFixed ? "not-allowed" : "pointer", // PCでクリック可能であることを示す
-    position: "relative", // 重なり順を正しく制御
-    zIndex: 10,           // 他の要素より手前に出す
-    appearance: "none",   // ブラウザ標準のスタイルを一度リセット（PC用）
-    WebkitAppearance: "menulist", // プルダウンの矢印を復活
+    cursor: isFixed ? "not-allowed" : "pointer",
+    position: "relative",
+    zIndex: 20, // 重なり順をさらに強化
+    WebkitAppearance: "menulist",
   };
 
   const handleFortune = async () => {
@@ -43,13 +41,10 @@ export default function Home() {
 
   return (
     <main style={{ backgroundColor: "#000", minHeight: "100vh", color: "#fff", padding: "20px", fontFamily: "sans-serif" }}>
-      <div style={{ maxWidth: "550px", margin: "0 auto", position: "relative" }}>
-        <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "20px" }}>
-          <button style={{ background: "#222", color: "#fff", border: "1px solid #444", padding: "8px 15px", borderRadius: "10px", fontSize: "12px", cursor: "pointer" }}>📖 取扱説明書</button>
-        </div>
+      <div style={{ maxWidth: "550px", margin: "0 auto" }}>
         <h1 style={{ textAlign: "center", fontSize: "36px", color: "#a5f3fc", margin: "30px 0" }}>AI Fortune Teller</h1>
         
-        <div style={{ backgroundColor: "#111", padding: "25px", borderRadius: "20px", border: "1px solid #222", position: "relative", zIndex: 1 }}>
+        <div style={{ backgroundColor: "#111", padding: "25px", borderRadius: "20px", border: "1px solid #222" }}>
           <h2 style={{ textAlign: "center", color: "#fbcfe8", fontSize: "18px", marginBottom: "30px" }}>占いたい方の情報を入力して下さい</h2>
           
           <div style={{ marginBottom: "15px" }}>
@@ -57,24 +52,36 @@ export default function Home() {
             <input type="text" disabled={isFixed} value={name} onChange={(e)=>setName(e.target.value)} style={inputStyle} />
           </div>
 
+          {/* 生年月日セクション：ここを重点的に修正 */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px", marginBottom: "15px" }}>
-            <div><label style={{ fontSize: "12px", color: "#94a3b8" }}>生年月日(年)</label>
+            <div>
+              <label style={{ fontSize: "12px", color: "#94a3b8", display: "block", marginBottom: "5px" }}>生年月日(年)</label>
               <select disabled={isFixed} value={year} onChange={(e)=>setYear(e.target.value)} style={inputStyle}>
-                {[...Array(100)].map((_, i) => <option key={i} value={2026-i}>{2026-i}</option>)}
+                {/* 1926年から2026年まで手動に近い形で生成 */}
+                {Array.from({length: 101}, (_, i) => 2026 - i).map(y => (
+                  <option key={y} value={y} style={{backgroundColor: "#111"}}>{y}</option>
+                ))}
               </select>
             </div>
-            <div><label style={{ fontSize: "12px", color: "#94a3b8" }}>月</label>
+            <div>
+              <label style={{ fontSize: "12px", color: "#94a3b8", display: "block", marginBottom: "5px" }}>月</label>
               <select disabled={isFixed} value={month} onChange={(e)=>setMonth(e.target.value)} style={inputStyle}>
-                {[...Array(12)].map((_, i) => <option key={i} value={i+1}>{i+1}</option>)}
+                {[1,2,3,4,5,6,7,8,9,10,11,12].map(m => (
+                  <option key={m} value={m} style={{backgroundColor: "#111"}}>{m}</option>
+                ))}
               </select>
             </div>
-            <div><label style={{ fontSize: "12px", color: "#94a3b8" }}>日</label>
+            <div>
+              <label style={{ fontSize: "12px", color: "#94a3b8", display: "block", marginBottom: "5px" }}>日</label>
               <select disabled={isFixed} value={day} onChange={(e)=>setDay(e.target.value)} style={inputStyle}>
-                {[...Array(31)].map((_, i) => <option key={i} value={i+1}>{i+1}</option>)}
+                {Array.from({length: 31}, (_, i) => i + 1).map(d => (
+                  <option key={d} value={d} style={{backgroundColor: "#111"}}>{d}</option>
+                ))}
               </select>
             </div>
           </div>
 
+          {/* 血液型・星座・干支（これらは機能しているとのことなのでスタイル維持） */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "10px", marginBottom: "20px" }}>
             <div><label style={{ fontSize: "12px", color: "#94a3b8" }}>血液型</label>
               <select disabled={isFixed} value={bloodType} onChange={(e)=>setBloodType(e.target.value)} style={inputStyle}>
@@ -93,22 +100,14 @@ export default function Home() {
             </div>
           </div>
 
-          <div style={{ marginBottom: "20px" }}>
-            <label style={{ color: "#ccc", fontSize: "14px", display: "block", marginBottom: "8px" }}>占う日</label>
-            <div style={{ display: "flex", gap: "10px" }}>
-              <button onClick={()=>setTargetDate("今日")} style={{ flex: 1, padding: "10px", borderRadius: "8px", border: "none", backgroundColor: targetDate === "今日" ? "#4f46e5" : "#1e293b", color: "#fff", cursor: "pointer", position: "relative", zIndex: 11 }}>今日</button>
-              <button onClick={()=>setTargetDate("明日")} style={{ flex: 1, padding: "10px", borderRadius: "8px", border: "none", backgroundColor: targetDate === "明日" ? "#4f46e5" : "#1e293b", color: "#fff", cursor: "pointer", position: "relative", zIndex: 11 }}>明日</button>
-            </div>
-          </div>
-
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-            <p style={{ color: "#22d3ee", fontSize: "13px", margin: 0 }}>本日の残り利用回数：5回</p>
-            <button onClick={() => setIsFixed(!isFixed)} style={{ backgroundColor: "#334155", color: "#fff", border: "none", padding: "8px 16px", borderRadius: "8px", fontSize: "13px", cursor: "pointer", position: "relative", zIndex: 11 }}>
+            <p style={{ color: "#22d3ee", fontSize: "13px" }}>本日の残り利用回数：5回</p>
+            <button onClick={() => setIsFixed(!isFixed)} style={{ backgroundColor: "#334155", color: "#fff", border: "none", padding: "8px 16px", borderRadius: "8px", fontSize: "13px", cursor: "pointer" }}>
               {isFixed ? "入力を解除する" : "入力を固定する"}
             </button>
           </div>
 
-          <button onClick={handleFortune} disabled={loading} style={{ width: "100%", padding: "16px", borderRadius: "12px", border: "none", fontSize: "18px", fontWeight: "bold", background: "linear-gradient(to right, #a855f7, #ec4899, #06b6d4)", color: "#fff", cursor: "pointer", position: "relative", zIndex: 11 }}>
+          <button onClick={handleFortune} disabled={loading} style={{ width: "100%", padding: "16px", borderRadius: "12px", border: "none", fontSize: "18px", fontWeight: "bold", background: "linear-gradient(to right, #a855f7, #ec4899, #06b6d4)", color: "#fff", cursor: "pointer" }}>
             {loading ? "鑑定中..." : "運勢を占う"}
           </button>
         </div>
